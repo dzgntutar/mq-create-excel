@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/gofiber/fiber/v2 v2.22.0
+	github.com/lib/pq v1.10.4
 	github.com/streadway/amqp v1.0.0
 )
 
