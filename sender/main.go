@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"mq-create-excel/rabbit"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -9,31 +10,14 @@ import (
 )
 
 func main() {
-	//rabbitServerURL := os.Getenv("RABBIT_SERVER_URL")
-	rabbitServerURL := "amqp://guest:guest@localhost:5672"
-	connection, err := amqp.Dial(rabbitServerURL)
 
-	if err != nil {
-		fmt.Println("Rabbit mq sunucusuna baglanılamadı..")
-		panic(err)
-	}
+	con := rabbit.CreateConnection()
+	defer con.Close()
 
-	defer connection.Close()
-
-	channel, err := connection.Channel()
-	if err != nil {
-		fmt.Println("Kanal olusturulurken hata meydana geldi")
-		panic(err)
-
-	}
-
+	channel := rabbit.CreateChannel(con)
 	defer channel.Close()
 
-	_, err = channel.QueueDeclare("create-excel", true, false, false, false, nil)
-
-	if err != nil {
-		panic(err)
-	}
+	rabbit.CreateQueue("create-excel", channel)
 
 	app := fiber.New()
 
@@ -54,6 +38,7 @@ func main() {
 			false,
 			message,
 		); err != nil {
+			fmt.Println(err)
 			return err
 		}
 

@@ -2,23 +2,14 @@ package main
 
 import (
 	"log"
-
-	"github.com/streadway/amqp"
+	"mq-create-excel/rabbit"
 )
 
 func main() {
-	rabbitServerURL := "amqp://guest:guest@localhost:5672"
+	con := rabbit.CreateConnection()
+	defer con.Close()
 
-	connection, err := amqp.Dial(rabbitServerURL)
-	if err != nil {
-		panic(err)
-	}
-	defer connection.Close()
-
-	channel, err := connection.Channel()
-	if err != nil {
-		panic(err)
-	}
+	channel := rabbit.CreateChannel(con)
 	defer channel.Close()
 
 	messages, err := channel.Consume(
