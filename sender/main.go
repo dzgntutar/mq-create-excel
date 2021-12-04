@@ -13,8 +13,8 @@ import (
 	"github.com/streadway/amqp"
 )
 
-type MyApp struct {
-	app        *fiber.App
+type app struct {
+	fiber      *fiber.App
 	db         *sql.DB
 	connection *amqp.Connection
 	channel    *amqp.Channel
@@ -25,22 +25,19 @@ var (
 )
 
 func main() {
-	myApp := MyApp{}
+	app := app{}
 
-	var host, port, user, password, dbName = "localhost", "5432", "postgres", "Password1*", "my-db"
+	app.initialize()
 
-	myApp.initialize(host, port, user, password, dbName)
-	defer myApp.connection.Close()
-	defer myApp.channel.Close()
+	app.routes()
 
-	myApp.routes()
-
-	myApp.app.Listen(":3000")
+	app.run()
 
 }
 
-func (app *MyApp) initialize(host, port, user, password, dbName string) {
+func (app *app) initialize() {
 	//Db
+	var host, port, user, password, dbName = "localhost", "5432", "postgres", "Password1*", "my-db"
 	connectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbName)
 	app.db, dbError = sql.Open("postgres", connectionString)
 
@@ -48,22 +45,24 @@ func (app *MyApp) initialize(host, port, user, password, dbName string) {
 		panic(dbError)
 	}
 
-	//Rebbit
+	//Rabbit
 	app.connection = rabbit.CreateConnection()
+	defer app.connection.Close()
 	app.channel = rabbit.CreateChannel(app.connection)
+	defer app.channel.Close()
 
 	rabbit.CreateQueue("create-excel", app.channel)
 
 	//Fiber
-	app.app = fiber.New()
+	app.fiber = fiber.New()
 
-	app.app.Use(
+	app.fiber.Use(
 		logger.New(),
 	)
 }
 
-func (app *MyApp) routes() {
-	app.app.Get("/create-excel", func(c *fiber.Ctx) error {
+func (app *app) routes() {
+	app.fiber.Get("/", func(c *fiber.Ctx) error {
 		// message := amqp.Publishing{
 		// 	ContentType: "text/plain",
 		// 	Body:        []byte(c.Query("product")),
@@ -80,18 +79,35 @@ func (app *MyApp) routes() {
 		// 	return err
 		// }
 
-		var product = models.Product{
-			Name:  "Telefon",
-			Price: 10000,
-			Stock: 5,
-		}
-
-		var productRepository = repository.ProductRepository{
+		var repository = repository.ProductRepository{
 			DB: app.db,
 		}
 
-		productRepository.Insert(product)
+		products, err := repository.GetAll()
+		if err != nil {
+			return err
+		}
+		c.JSON(products)
 
 		return nil
 	})
+
+	app.fiber.Post("/product", func(c *fiber.Ctx) error {
+		p := models.Product{}
+
+		if err := c.BodyParser(&p); err != nil {
+			return err
+		}
+
+		var repository = repository.ProductRepository{
+			DB: app.db,
+		}
+
+		repository.Insert(p)
+		return nil
+	})
+}
+
+func (app *app) run() {
+	app.fiber.Listen(":3000")
 }

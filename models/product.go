@@ -1,8 +1,8 @@
 package models
 
 type Product struct {
-	Id    int32
-	Name  string
-	Price float32
-	Stock int32
+	Id    int32   `json:"id"`
+	Name  string  `json:"name"`
+	Price float32 `json:"price"`
+	Stock int32   `json:"stock"`
 }
