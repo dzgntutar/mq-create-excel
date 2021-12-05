@@ -47,10 +47,7 @@ func (app *app) initialize() {
 
 	//Rabbit
 	app.connection = rabbit.CreateConnection()
-	defer app.connection.Close()
 	app.channel = rabbit.CreateChannel(app.connection)
-	defer app.channel.Close()
-
 	rabbit.CreateQueue("create-excel", app.channel)
 
 	//Fiber
@@ -63,31 +60,21 @@ func (app *app) initialize() {
 
 func (app *app) routes() {
 	app.fiber.Get("/product", func(c *fiber.Ctx) error {
-		// message := amqp.Publishing{
-		// 	ContentType: "text/plain",
-		// 	Body:        []byte(c.Query("product")),
-		// }
 
-		// if err := myApp.Channel.Publish(
-		// 	"",
-		// 	"create-excel",
-		// 	false,
-		// 	false,
-		// 	message,
-		// ); err != nil {
-		// 	fmt.Println(err)
-		// 	return err
-		// }
-
-		var repository = repository.ProductRepository{
-			DB: app.db,
-		}
+		var (
+			repository = repository.ProductRepository{
+				DB: app.db,
+			}
+		)
 
 		products, err := repository.GetAll()
 		if err != nil {
 			return err
 		}
-		c.JSON(products)
+		err = c.JSON(products)
+		if err != nil {
+			panic(err)
+		}
 
 		return nil
 	})
@@ -103,7 +90,30 @@ func (app *app) routes() {
 			DB: app.db,
 		}
 
-		repository.Insert(p)
+		err := repository.Insert(p)
+		if err != nil {
+			panic(err)
+		}
+		return nil
+	})
+
+	app.fiber.Post("/create-excel", func(ctx *fiber.Ctx) error {
+
+		processName := "product-excel"
+		var message = amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(processName),
+		}
+		if err := app.channel.Publish(
+			"",
+			"create-excel",
+			false,
+			false,
+			message,
+		); err != nil {
+			fmt.Println(err)
+			return err
+		}
 		return nil
 	})
 }
