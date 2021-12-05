@@ -62,7 +62,7 @@ func (app *app) initialize() {
 }
 
 func (app *app) routes() {
-	app.fiber.Get("/", func(c *fiber.Ctx) error {
+	app.fiber.Get("/product", func(c *fiber.Ctx) error {
 		// message := amqp.Publishing{
 		// 	ContentType: "text/plain",
 		// 	Body:        []byte(c.Query("product")),
