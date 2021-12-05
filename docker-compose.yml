@@ -11,7 +11,7 @@ services:
 
   message-broker:
     image: rabbitmq:management-alpine
-    container_name: app-message-broker
+#    container_name: app-message-broker
     ports:
       - 5672:5672
       - 15672:15672

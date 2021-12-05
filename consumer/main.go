@@ -32,7 +32,11 @@ func main() {
 
 	go func() {
 		for message := range messages {
-			log.Printf("Gelen Mesaj: %s\n", message.Body)
+			if string(message.Body) == "product-excel" {
+				log.Printf("Gelen Mesaj: %s\n", message.Body)
+				log.Printf("%s\n", "Excel işlemi başlıyor..")
+
+			}
 		}
 	}()
 
