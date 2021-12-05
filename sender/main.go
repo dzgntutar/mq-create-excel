@@ -3,14 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"mq-create-excel/models"
-	"mq-create-excel/rabbit"
-	"mq-create-excel/repository"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	_ "github.com/lib/pq"
 	"github.com/streadway/amqp"
+	"mq-create-excel/models"
+	"mq-create-excel/rabbit"
+	"mq-create-excel/repository"
 )
 
 type app struct {
