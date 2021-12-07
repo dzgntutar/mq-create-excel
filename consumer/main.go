@@ -5,9 +5,11 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/streadway/amqp"
+	"github.com/xuri/excelize/v2"
 	"log"
 	"mq-create-excel/rabbit"
 	"mq-create-excel/repository"
+	"strconv"
 )
 
 type app struct {
@@ -67,9 +69,26 @@ func main() {
 					log.Println(err)
 				}
 
-				log.Println(len(products))
-				// create excel , save in a folder after that insert in a db
+				// create excel , save in a folder
 
+				f := excelize.NewFile()
+				f.NewSheet("Products")
+
+				for i, product := range products {
+
+					err = f.SetCellValue("Products", "A"+strconv.Itoa(i+1), product.Id) //name
+					/*if err != nil {
+						log.Println(err)
+						log.Println("A" + string(i+1))
+					}*/
+					f.SetCellValue("Products", "B"+strconv.Itoa(i+1), product.Name)  //name
+					f.SetCellValue("Products", "C"+strconv.Itoa(i+1), product.Price) //price
+					f.SetCellValue("Products", "D"+strconv.Itoa(i+1), product.Stock) //stock
+				}
+
+				if err := f.SaveAs("products.xlsx"); err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
 	}()
