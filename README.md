@@ -6,9 +6,9 @@ create excel file with golang ,Fiber web framework and Rabbit MQ.
 
 up Sender --> run  "go run sender/main.go"
 
-up Consumer --< un in other terminal  "go run consumer/main.go"
+up Consumer --< run in other terminal  "go run consumer/main.go"
 
-You can use this endpoints for add product in postgres db and can send to queue.
+You can use this endpoints for add product to postgres db and can send to queue.
 
 Get -->  http://localhost:3000/product
 
