@@ -74,16 +74,21 @@ func main() {
 				f := excelize.NewFile()
 				f.NewSheet("Products")
 
+				f.SetCellValue("Products", "A1", "ID")
+				f.SetCellValue("Products", "B1", "Name")
+				f.SetCellValue("Products", "C1", "Price")
+				f.SetCellValue("Products", "d1", "Stock")
+
 				for i, product := range products {
 
-					err = f.SetCellValue("Products", "A"+strconv.Itoa(i+1), product.Id) //name
+					err = f.SetCellValue("Products", "A"+strconv.Itoa(i+2), product.Id) //name
 					/*if err != nil {
 						log.Println(err)
 						log.Println("A" + string(i+1))
 					}*/
-					f.SetCellValue("Products", "B"+strconv.Itoa(i+1), product.Name)  //name
-					f.SetCellValue("Products", "C"+strconv.Itoa(i+1), product.Price) //price
-					f.SetCellValue("Products", "D"+strconv.Itoa(i+1), product.Stock) //stock
+					f.SetCellValue("Products", "B"+strconv.Itoa(i+2), product.Name)  //name
+					f.SetCellValue("Products", "C"+strconv.Itoa(i+2), product.Price) //price
+					f.SetCellValue("Products", "D"+strconv.Itoa(i+2), product.Stock) //stock
 				}
 
 				if err := f.SaveAs("products.xlsx"); err != nil {
